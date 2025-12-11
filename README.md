@@ -11,3 +11,4 @@ So, I make addon to do this.
 Download op_rip_mod.py and Preferences -> Add-ons -> \/ -> Instal from Disk ... .
 Enable Single Vertex Rip Operator.
 Overwrite V key function.
+If not select only single vertex (, or some situation), call bpy.ops.mesh.rip_move('INVOKE_DEFAULT').
