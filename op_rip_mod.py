@@ -16,7 +16,9 @@ def main(self, context):
         
         select_verts = [v for v in bm.verts if v.select]
         
-        if len(select_verts) == 1:
+        if len(select_verts) != 1:
+            bpy.ops.mesh.rip_move('INVOKE_DEFAULT')
+        else:
             select_vert = select_verts[0]
             if not select_vert.is_manifold or len(select_vert.link_faces)==1:
                 self.report({'ERROR'}, "Cannot rip")
