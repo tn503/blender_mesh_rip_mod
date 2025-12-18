@@ -7,6 +7,11 @@ Default Blender Rip Operator (V key in mesh editmode) does not rip like above im
 Only 3 faces connected.
 So, I make addon to do this.
 
+# Update
+December 18th, 2025.
+* Calculate Object Transform.
+* It seems like bmesh.utils.vert_splice makes edge double. So use bmesh.ops.remove_doubles instead.
+
 # Usage
 Download op_rip_mod.py and Preferences -> Add-ons -> \/ -> Instal from Disk ... .
 Enable Single Vertex Rip Operator.
