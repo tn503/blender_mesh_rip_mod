@@ -20,13 +20,15 @@ def main(self, context):
             bpy.ops.mesh.rip_move('INVOKE_DEFAULT')
         else:
             select_vert = select_verts[0]
+            matrix = obj.matrix_world
+            
             if not select_vert.is_manifold or len(select_vert.link_faces)==1:
                 self.report({'ERROR'}, "Cannot rip")
                 return
             if select_vert.is_wire or len(select_vert.link_faces)==2: 
                 bpy.ops.mesh.rip_move('INVOKE_DEFAULT')
                 return
-                
+            
             
             mp = mathutils.Vector((self.x, self.y))
             dmin = 10000
@@ -34,13 +36,14 @@ def main(self, context):
             
             for f in select_vert.link_faces:
                 f_center = f.calc_center_median()
-                f_center2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, f_center)
+                f_center2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, matrix @ f_center)
                 dist0 = (mp - f_center2d).length
                 
                 #closest_point_on_tri
                 v_2d = []
                 for v in f.verts:
-                    vxy = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, v.co)
+                    vt = mathutils.Vector(v.co)
+                    vxy = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, matrix @ vt)
                     v_2d.append(vxy)
                     
                 closest_point = mathutils.geometry.closest_point_on_tri(mp, v_2d[0], v_2d[1], v_2d[2])
@@ -63,8 +66,12 @@ def main(self, context):
             edge_rotate_angle = 15 #degrees
             for e in select_vert.link_edges:
                 v2 = e.other_vert(select_vert)
-                v1_2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, select_vert.co)
-                v2_2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, v2.co)
+                
+                vt1 = mathutils.Vector(select_vert.co)
+                vt2 = mathutils.Vector(v2.co)
+                
+                v1_2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, matrix @ vt1)
+                v2_2d = view3d_utils.location_3d_to_region_2d(c.region, c.space_data.region_3d, matrix @ vt2)
                 #closest_point, dist = mathutils.geometry.intersect_point_line_segment(mp, v1_2d, v2_2d)
                 
                 #edge rotate +-edge_rotate_angle and make triangle and hittest
@@ -102,12 +109,17 @@ def main(self, context):
                             v_new = bmesh.utils.face_vert_separate(f, select_vert)
                             v_new_array.append(v_new)
                         
-                        bmesh.utils.vert_splice(v_new_array[0], v_new_array[1])
+                        bmesh.ops.remove_doubles(bm, verts=[v_new_array[0], v_new_array[1]])
+                        
+                        if v_new_array[0].is_valid:
+                            v_valid = v_new_array[0]
+                        else:
+                            v_valid = v_new_array[1]
                         
                         select_vert.select = False
                         bm.select_history.remove(select_vert)
-                        v_new_array[1].select = True
-                        bm.select_history.add(v_new_array[1])
+                        v_valid.select = True
+                        bm.select_history.add(v_valid)
                         bmesh.update_edit_mesh(obj.data)
                         do_nothing = False
                 
