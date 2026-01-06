@@ -23,7 +23,8 @@ def main(self, context):
             matrix = obj.matrix_world
             
             if not select_vert.is_manifold or len(select_vert.link_faces)==1:
-                self.report({'ERROR'}, "Cannot rip")
+                #self.report({'ERROR'}, "Cannot rip")
+                bpy.ops.mesh.rip_move('INVOKE_DEFAULT')
                 return
             if select_vert.is_wire or len(select_vert.link_faces)==2: 
                 bpy.ops.mesh.rip_move('INVOKE_DEFAULT')
