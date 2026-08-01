@@ -55,7 +55,7 @@ def main(self, context):
                     if dist2 < dist1:
                         dist1 = dist2
                 
-                dist = min(dist0, dist1, dist2)
+                dist = min(dist0, dist1)
                 
                 if dist < dmin:
                     best = f
